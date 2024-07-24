@@ -1,6 +1,6 @@
 # Discord YouTube Live Clipping Bot
 
-A simple Discord clipping bot for YouTube livestreams. Right now it uploads to the CDN (which means it has a 25MB limit - I'm hoping to add some system to upload it somewhere else in the future! or maybe even compression... who knows)
+A simple Discord clipping bot for YouTube livestreams. The clip is uploaded to the Discord CDN (and if it doesn't fit under 25MB, it's compressed and then uploaded. rclone uploads are planned)
 
 # Demo
 
