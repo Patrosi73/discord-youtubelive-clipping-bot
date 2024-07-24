@@ -12,6 +12,7 @@ https://github.com/user-attachments/assets/b4305951-f7b9-4e4a-b81d-2d60833f3d14
 # Requirements
 - [ffmpeg](https://ffmpeg.org/download.html#build-windows) in PATH (or in the same directory as the bot)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp/releases/) in PATH (or in the same directory as the bot)
+- [a fork of ytarchive (for now) with custom duration support](https://github.com/keredau/ytarchive/tree/feature/duration) in PATH or in the same directory as the bot - my compiled .exe can be found [here](https://github.com/Patrosi73/discord-youtubelive-clipping-bot/raw/main/ytarchive.exe) 
 
 # Setup
 1. Git Clone/Download the repository as a .zip
