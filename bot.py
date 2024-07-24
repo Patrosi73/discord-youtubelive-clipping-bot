@@ -21,14 +21,20 @@ list_of_files = glob.glob('.\\*.mp4')
 newest = max(list_of_files, key=os.path.getctime)
 just_file_name = newest.split('\\')[-1]
 
+@bot.command()
+@commands.is_owner()
+async def sync(ctx: commands.Context) -> None:
+    """Sync commands"""
+    synced = await ctx.bot.tree.sync()
+    await ctx.send(f"Synced {len(synced)} commands globally")
 
 @bot.event
 async def on_ready():
     print(f'logged in as {bot.user}')
 
-@bot.tree.command(name="clips", description="Clips a YouTube livestream")
+@bot.tree.command(name="clip", description="Clips a YouTube livestream")
 @app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip")
-async def clips(interaction: discord.Interaction, link: str, seconds: int) -> None:
+async def clip(interaction: discord.Interaction, link: str, seconds: int) -> None:
     download_command = [
     "yt-dlp",
     f"--downloader-args", f"ffmpeg:-t {seconds}",
