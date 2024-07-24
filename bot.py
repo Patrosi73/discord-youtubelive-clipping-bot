@@ -27,14 +27,10 @@ async def sync(ctx: commands.Context) -> None:
 async def on_ready():
     print(f'logged in as {bot.user}')
 
-@bot.tree.command(name="clip", description="Clips a YouTube livestream")
-@app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip")
-async def clip(interaction: discord.Interaction, link: str, seconds: int) -> None:
-    download_command = [
-    "yt-dlp",
-    f"--downloader-args", f"ffmpeg:-t {seconds}",
-    link
-]
+@bot.tree.command(name="clip", description="Clips a YouTube livestream",)
+@app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip", rewind="Rewind the specified amount of seconds - you probably want this")
+async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind: bool) -> None:
+
     await interaction.response.defer()
     try:
         live_status = subprocess.check_output(["yt-dlp", link, "--print", "live_status"], text=True).strip()
@@ -45,7 +41,20 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int) -> Non
         case "not_live":
             await interaction.followup.send(f"`{link}` is not a livestream")
         case "is_live":
-            await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
+            if (rewind):
+                await interaction.followup.send(f"Downloading the last {seconds} seconds of stream...")
+                download_command = [
+                    "ytarchive",
+                    f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
+                    link, "best"
+                ]
+            else:
+                await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
+                download_command = [
+                    "ytarchive",
+                    f"--live-from", "now", f"--capture-duration", f"{seconds}s",
+                    link, "best"
+                ]
             try:
                 subprocess.call(download_command)
             except subprocess.CalledProcessError as e:
@@ -56,7 +65,7 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int) -> Non
             newest = max(list_of_files, key=os.path.getctime)
             just_file_name = newest.split('\\')[-1]
 
-            await interaction.followup.send(f"Download finished, uploading... \n -# if you don't see the clip after some time, the upload has failed. you can find it in the bot's folder")
+            await interaction.followup.send(f"Download finished, uploading... \n -# if you don't see the clip after some time, the upload has failed. you can find the clip in the bot's folder")
             file = discord.File(just_file_name, filename="clip.mp4")
             await interaction.followup.send(file=file)
             
