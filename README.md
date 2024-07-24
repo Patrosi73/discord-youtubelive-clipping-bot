@@ -1,6 +1,6 @@
 # Discord YouTube Live Clipping Bot
 
-*because charging people 75$ for a yt-dlp frontend is scummy*
+A simple Discord clipping bot for YouTube livestreams. Right now it uploads to the CDN (which means it has a 25MB limit - I'm hoping to add some system to upload it somewhere else in the future! or maybe even compression... who knows)
 
 # Requirements
 - [ffmpeg](https://ffmpeg.org/download.html#build-windows) in PATH (or in the same directory as the bot)

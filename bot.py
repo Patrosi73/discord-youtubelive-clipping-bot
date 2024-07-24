@@ -16,11 +16,6 @@ async def setup_hook() -> None:
     await bot.tree.sync()
 bot.setup_hook = setup_hook
 
-
-list_of_files = glob.glob('.\\*.mp4')
-newest = max(list_of_files, key=os.path.getctime)
-just_file_name = newest.split('\\')[-1]
-
 @bot.command()
 @commands.is_owner()
 async def sync(ctx: commands.Context) -> None:
@@ -56,10 +51,14 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int) -> Non
             except subprocess.CalledProcessError as e:
                 await interaction.followup.send(f"Failed to download.")
                 return
-            await interaction.followup.send(f"Download finished, uploading...")
+            
+            list_of_files = glob.glob('.\\*.mp4')
+            newest = max(list_of_files, key=os.path.getctime)
+            just_file_name = newest.split('\\')[-1]
+
+            await interaction.followup.send(f"Download finished, uploading... \n -# if you don't see the clip after some time, the upload has failed. you can find it in the bot's folder")
             file = discord.File(just_file_name, filename="clip.mp4")
             await interaction.followup.send(file=file)
-            os.remove(just_file_name)
             
         case "is_upcoming":
             await interaction.followup.send(f"`{link}` is an upcoming stream, cannot clip something that doesn't exist yet ;)")
