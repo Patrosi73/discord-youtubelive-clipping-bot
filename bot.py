@@ -2,6 +2,8 @@ import os
 import discord
 import subprocess
 import glob
+import uuid
+from compress import compress
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands
@@ -10,6 +12,7 @@ intents.message_content = True
 
 load_dotenv()
 token = os.getenv("TOKEN")
+max_duration = os.getenv("MAX_DURATION")
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 async def setup_hook() -> None:
@@ -32,42 +35,51 @@ async def on_ready():
 async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind: bool) -> None:
 
     await interaction.response.defer()
+    max_duration_int = int(max_duration)
+    if (seconds > max_duration_int):
+        await interaction.followup.send(f"Clip requested too large (max: {max_duration} seconds)")
+        return
     try:
         live_status = subprocess.check_output(["yt-dlp", link, "--print", "live_status"], text=True).strip()
-    except subprocess.CalledProcessError as e:
+    except:
         await interaction.followup.send(f"Failed to check live status.")
         return
     match live_status:
         case "not_live":
             await interaction.followup.send(f"`{link}` is not a livestream")
         case "is_live":
+            randomuuid = str(uuid.uuid4())
             if (rewind):
                 await interaction.followup.send(f"Downloading the last {seconds} seconds of stream...")
                 download_command = [
                     "ytarchive",
-                    f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
+                    f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
                     link, "best"
                 ]
             else:
                 await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
                 download_command = [
                     "ytarchive",
-                    f"--live-from", "now", f"--capture-duration", f"{seconds}s",
+                    f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
                     link, "best"
                 ]
             try:
                 subprocess.call(download_command)
-            except subprocess.CalledProcessError as e:
+            except:
                 await interaction.followup.send(f"Failed to download.")
                 return
             
-            list_of_files = glob.glob('.\\*.mp4')
-            newest = max(list_of_files, key=os.path.getctime)
-            just_file_name = newest.split('\\')[-1]
-
-            await interaction.followup.send(f"Download finished, uploading... \n -# if you don't see the clip after some time, the upload has failed. you can find the clip in the bot's folder")
-            file = discord.File(just_file_name, filename="clip.mp4")
-            await interaction.followup.send(file=file)
+            clip_filename = f"{randomuuid}.mp4"
+            clip_filename_compressed = f"25MB_{randomuuid}.mp4"
+            if (os.path.getsize(f"{randomuuid}.mp4") > 25165824):
+                await interaction.followup.send(f"Download finished. Output file too large for Discord, compressing and uploading...")
+                compress(clip_filename, seconds)
+                file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
+                await interaction.followup.send(file=file)
+            else:
+                await interaction.followup.send(f"Download finished, uploading...")
+                file = discord.File(clip_filename, filename=f"clip_{randomuuid}.mp4")
+                await interaction.followup.send(file=file)
             
         case "is_upcoming":
             await interaction.followup.send(f"`{link}` is an upcoming stream, cannot clip something that doesn't exist yet ;)")

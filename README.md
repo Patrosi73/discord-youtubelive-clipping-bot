@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/b4305951-f7b9-4e4a-b81d-2d60833f3d14
 1. Git Clone/Download the repository as a .zip
 2. [Set up a Discord bot](https://www.xda-developers.com/how-to-create-discord-bot/) (follow guide until "assign bot function")
 3. Create a file in the bot folder called `.env`. Inside it, put `TOKEN=(token)`, replacing (token) with your Discord bot token
-4. Run `pip install discord.py` in a terminal
+4. Run `pip install discord.py python-dotenv` in a terminal
 5. Run `python bot.py`. The bot will be online until you close the terminal.
 
 # NOTICE
