@@ -18,9 +18,9 @@ https://github.com/user-attachments/assets/a48e28f3-11fc-4cc6-ae3e-c14dd7167597
 3. Create a file in the bot folder called `.env`. Inside it, put
    ```
    TOKEN=(token)
-   MAX_LENGTH=(length)
+   MAX_DURATION=(duration)
    ```
-   replacing (token) with your Discord bot token and (length) with your desired max clip length (this is intended for people that want to host this bot publicly)
+   replacing (token) with your Discord bot token and (duration) with your desired max clip duration (this is intended for people that want to host this bot publicly)
 5. Run `pip install discord.py python-dotenv` in a terminal
 6. Run `python bot.py`. The bot will be online until you close the terminal.
 
