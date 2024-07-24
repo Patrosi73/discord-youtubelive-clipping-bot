@@ -4,9 +4,7 @@ A simple Discord clipping bot for YouTube livestreams. Right now it uploads to t
 
 # Demo
 
-https://github.com/user-attachments/assets/b4305951-f7b9-4e4a-b81d-2d60833f3d14
-
-
+https://github.com/user-attachments/assets/a48e28f3-11fc-4cc6-ae3e-c14dd7167597
 
 
 # Requirements
