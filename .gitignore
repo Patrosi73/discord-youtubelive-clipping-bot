@@ -164,4 +164,3 @@ cython_debug/
 keys.json
 yt-dlp.exe
 ffmpeg.exe
-*.mp4
