@@ -39,6 +39,25 @@ async def check_live_status(link: str):
     except:
         return None
 
+async def download_clip(link: str, seconds: int, rewind: bool, randomuuid: str):
+        if rewind:
+            download_command = [
+                "ytarchive",
+                f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
+                link, "best"
+            ]
+        else:
+            download_command = [
+                "ytarchive",
+                f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
+                link, "best"
+            ]
+        try:
+            subprocess.call(download_command)
+            return True
+        except:
+            return False
+
 @bot.tree.command(name="clip", description="Clips a YouTube livestream",)
 @app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip", rewind="Rewind the specified amount of seconds - you probably want this")
 async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind: bool) -> None:
@@ -60,21 +79,11 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
             randomuuid = str(uuid.uuid4())
             if (rewind):
                 await interaction.followup.send(f"Downloading the last {seconds} seconds of stream...")
-                download_command = [
-                    "ytarchive",
-                    f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
-                    link, "best"
-                ]
             else:
                 await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
-                download_command = [
-                    "ytarchive",
-                    f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
-                    link, "best"
-                ]
-            try:
-                subprocess.call(download_command)
-            except:
+                
+            download_success = await asyncio.to_thread(download_clip, link, seconds, rewind, randomuuid)
+            if not download_success:
                 await interaction.followup.send(f"Failed to download.")
                 return
             
