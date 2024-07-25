@@ -12,9 +12,28 @@ from utils import send_message
 intents = discord.Intents.default()
 intents.message_content = True
 
+# check if .env file exists
+if not os.path.exists(".env"):
+    # copy if can't find
+    with open(".env.example", "r") as f:
+        with open(".env", "w") as f1:
+            for line in f:
+                f1.write(line)
+    print("Generated .env file.")
+    print("Please read the Readme on how to set up the bot if you don't know what to do.")
+    exit()
+
 load_dotenv()
 token = os.getenv("TOKEN")
 max_duration = os.getenv("MAX_DURATION")
+
+# if token is not set tell the user to read the readme
+if token == "(token)":
+    print("It seems that you have the .env file generated but the token is unchanged")
+    print("Please set your bot token in the .env file accordingly")
+    print("Alternatively, read the readme file.")
+    exit()
+
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 async def setup_hook() -> None:
@@ -28,13 +47,16 @@ async def sync(ctx: commands.Context) -> None:
     synced = await ctx.bot.tree.sync()
     await ctx.send(f"Synced {len(synced)} commands globally")
 
-
-
-
-
 @bot.event
 async def on_ready():
     print(f'logged in as {bot.user}')
+
+async def run_command(command):
+    # ChatGPT generated this for me :sunglasses_face:
+    # still have no idea what black magic it actually does but it works. fuck it we ball
+    process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = await process.communicate()
+    return stdout.decode(), stderr.decode()
 
 @bot.tree.command(name="clip", description="Clips a YouTube livestream",)
 @app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip", rewind="Rewind the specified amount of seconds - you probably want this")
@@ -47,15 +69,6 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
     if (seconds > max_duration_int):
         await send_message(interaction,f"Clip requested too large (max: {max_duration} seconds)")
         return
-
-    async def run_command(command):
-        # ChatGPT generated this for me :sunglasses_face:
-        # still have no idea what black magic it actually does but it works. fuck it we ball
-        process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = await process.communicate()
-        return stdout.decode(), stderr.decode()
-
-
     try:
 
         stdout, _ = await run_command(["yt-dlp", link, "--print", "live_status"])
