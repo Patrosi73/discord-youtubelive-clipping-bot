@@ -3,7 +3,6 @@ import discord
 import subprocess
 import glob
 import uuid
-import asyncio
 from compress import compress
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -31,33 +30,6 @@ async def sync(ctx: commands.Context) -> None:
 async def on_ready():
     print(f'logged in as {bot.user}')
 
-
-async def check_live_status(link: str):
-    try:
-        live_status = subprocess.check_output(["yt-dlp", link, "--print", "live_status"], text=True).strip()
-        return live_status
-    except:
-        return None
-
-async def download_clip(link: str, seconds: int, rewind: bool, randomuuid: str):
-        if rewind:
-            download_command = [
-                "ytarchive",
-                f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
-                link, "best"
-            ]
-        else:
-            download_command = [
-                "ytarchive",
-                f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
-                link, "best"
-            ]
-        try:
-            subprocess.call(download_command)
-            return True
-        except:
-            return False
-
 @bot.tree.command(name="clip", description="Clips a YouTube livestream",)
 @app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip", rewind="Rewind the specified amount of seconds - you probably want this")
 async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind: bool) -> None:
@@ -67,9 +39,9 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
     if (seconds > max_duration_int):
         await interaction.followup.send(f"Clip requested too large (max: {max_duration} seconds)")
         return
-
-    live_status = await check_live_status(link)
-    if live_status is None:
+    try:
+        live_status = subprocess.check_output(["yt-dlp", link, "--print", "live_status"], text=True).strip()
+    except:
         await interaction.followup.send(f"Failed to check live status.")
         return
     match live_status:
@@ -79,11 +51,21 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
             randomuuid = str(uuid.uuid4())
             if (rewind):
                 await interaction.followup.send(f"Downloading the last {seconds} seconds of stream...")
+                download_command = [
+                    "ytarchive",
+                    f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",
+                    link, "best"
+                ]
             else:
                 await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
-                
-            download_success = await asyncio.to_thread(download_clip, link, seconds, rewind, randomuuid)
-            if not download_success:
+                download_command = [
+                    "ytarchive",
+                    f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
+                    link, "best"
+                ]
+            try:
+                subprocess.call(download_command)
+            except:
                 await interaction.followup.send(f"Failed to download.")
                 return
             
