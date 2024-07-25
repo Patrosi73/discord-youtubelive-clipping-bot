@@ -20,11 +20,10 @@ https://github.com/user-attachments/assets/a48e28f3-11fc-4cc6-ae3e-c14dd7167597
 > [!NOTE]
 > For Windows users, please check if Python is in PATH. And make sure to run Python correctly as most times it's `py` or `python3` instead of `python`. In this guide, This will be referred to as `python` at the start of the command.
 1. Git Clone/Download the repository as a .zip and extract it.
-> [!NOTE]
-> When inviting the bot to your server, make sure the bot has "Message Intent" and "Application Command" scope on when you are making an invite link.
 2. If you don't know what a bot token is, follow the guide in [Add Bot Readme File](/ADD-BOT.md) if you don't know what this means. If you do, create a bot at the [Discord Developer Portal](https://discord.com/developers/applications)
 > [!IMPORTANT]
-> Do NOT forget to turn on "Message Content Intent" and in the Bot settings.
+> Do NOT forget to turn on "Message Content Intent" and in the Bot settings and "Application Command" scope in OAuth2 settings.
+
 3. Run `pip install discord.py python-dotenv` in a terminal
 > [!NOTE]
 > You might not have `pip` installed but you can try running `python -m pip install discord.py python-dotenv`  instead.
