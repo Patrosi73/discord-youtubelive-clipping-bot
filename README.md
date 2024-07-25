@@ -8,6 +8,8 @@ https://github.com/user-attachments/assets/a48e28f3-11fc-4cc6-ae3e-c14dd7167597
 
 
 # Requirements
+> [!NOTE]
+> If you're on a Windows PC, I've made a script that automatically downloads everything for you (except for Python which you have to install yourself). Run **setup-for-windows.bat**
 - [Python 3.8+](https://www.python.org/downloads/) in PATH
 - [ffmpeg](https://ffmpeg.org/download.html#build-windows) in PATH (or in the same directory as the bot)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp/releases/) in PATH (or in the same directory as the bot)
