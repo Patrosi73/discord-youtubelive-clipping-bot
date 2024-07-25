@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/a48e28f3-11fc-4cc6-ae3e-c14dd7167597
 > [!NOTE]
 > You might not have `pip` installed but you can try running `python -m pip install discord.py python-dotenv`  instead.
 4. Run `python bot.py` once.
-5. The program will create a `.env` file in the same directory as the bot. Add your bot token to the file replacing the "(token)". Also, set maximum duration of the clip in seconds (default is 100 seconds), should you want to change it.
+5. The program will create a `.env` file in the same directory as the bot. Add your bot token to the file replacing the "(token)". Also, set maximum duration of the clip in seconds (default is 180 seconds), should you want to change it.
 > [!NOTE]
 > If you followed the guide, it's the thing you copied after you reset token.
 6. Run `python bot.py` again.
