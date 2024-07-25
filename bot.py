@@ -3,10 +3,12 @@ import discord
 import subprocess
 import glob
 import uuid
+import asyncio
 from compress import compress
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -39,17 +41,28 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
     if (seconds > max_duration_int):
         await interaction.followup.send(f"Clip requested too large (max: {max_duration} seconds)")
         return
+
+    async def run_command(command):
+        # ChatGPT generated this for me :sunglasses_face:
+        # still have no idea what black magic it actually does but it works. fuck it we ball
+        process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = await process.communicate()
+        return stdout.decode(), stderr.decode()
+
     try:
-        live_status = subprocess.check_output(["yt-dlp", link, "--print", "live_status"], text=True).strip()
-    except:
-        await interaction.followup.send(f"Failed to check live status.")
+        stdout, _ = await run_command(["yt-dlp", link, "--print", "live_status"])
+        live_status = stdout.strip()
+    except Exception as e:
+        last_line = e.args[0].strip().split('\n')[-1]
+        await interaction.followup.send(f"Failed to check live status: {str(last_line)}")
         return
+
     match live_status:
         case "not_live":
-            await interaction.followup.send(f"`{link}` is not a livestream")
+            await interaction.followup.send(f"{link} is not a livestream")
         case "is_live":
             randomuuid = str(uuid.uuid4())
-            if (rewind):
+            if rewind:
                 await interaction.followup.send(f"Downloading the last {seconds} seconds of stream...")
                 download_command = [
                     "ytarchive",
@@ -63,15 +76,19 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                     f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s",
                     link, "best"
                 ]
-            try:
-                subprocess.call(download_command)
-            except:
-                await interaction.followup.send(f"Failed to download.")
-                return
             
+            try:
+                stdout, stderr = await run_command(download_command)
+                if "Final file" not in stdout and "Final file" not in stderr:
+                    raise Exception(stderr)
+            except Exception as e:
+                last_line = e.args[0].strip().split('\n')[-1]
+                await interaction.followup.send(f"Failed to download: {str(last_line)}")
+                return
+
             clip_filename = f"{randomuuid}.mp4"
             clip_filename_compressed = f"25MB_{randomuuid}.mp4"
-            if (os.path.getsize(f"{randomuuid}.mp4") > 25165824):
+            if (os.path.getsize(clip_filename) > 25165824):
                 await interaction.followup.send(f"Download finished. Output file too large for Discord, compressing and uploading...")
                 compress(clip_filename, seconds)
                 file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
@@ -89,4 +106,5 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
             await interaction.followup.send(f"`{link}` is no longer live and isn't yet processed. You just missed it :(")
         case _:
             await interaction.followup.send(f"Unknown live status: `{live_status}`")
+
 bot.run(token)
