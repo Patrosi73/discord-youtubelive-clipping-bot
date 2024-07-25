@@ -18,7 +18,7 @@ async def compress(inputfile, duration):
     "-stats",
     "-hwaccel", "auto",
     "-i", inputfile,
-    "-c:v", "h264_nvenc",
+    "-c:v", "x264",
     f"-b:v", f"{video_bitrate}k",
     "-c:a", "aac",
     f"-b:a", f"{audio_bitrate}k",
