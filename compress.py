@@ -1,6 +1,13 @@
 import subprocess
+import asyncio
+from bot import send_message
 # this is mostly stolen code from https://github.com/MyloBishop/discompress because i was too lazy to figure out compression stuff myself haha
-def compress(inputfile, duration):
+async def run_command(command):
+        process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = await process.communicate()
+        return stdout.decode(), stderr.decode()
+
+async def compress(inputfile, duration):
     bitrate = 23 * 8 * 1000 / duration
     video_bitrate = bitrate * 90 / 100
     audio_bitrate = bitrate * 10 / 100
@@ -20,4 +27,9 @@ def compress(inputfile, duration):
     f"-maxrate", f"{bitrate}k",
     f"25MB_{inputfile}"
     ]
-    subprocess.call(command)
+    try:
+        await run_command(command)
+    except Exception as e:
+        last_line = e.args[0].strip().split('\n')[-1]
+        await send_message(f"Failed to compress: {str(last_line)}")
+        

@@ -1,7 +1,6 @@
 import os
 import discord
 import subprocess
-import glob
 import uuid
 import asyncio
 from compress import compress
@@ -28,6 +27,12 @@ async def sync(ctx: commands.Context) -> None:
     synced = await ctx.bot.tree.sync()
     await ctx.send(f"Synced {len(synced)} commands globally")
 
+
+async def send_message(interaction: discord.Interaction, message: str): 
+    await interaction.followup.send(message)
+    return
+
+
 @bot.event
 async def on_ready():
     print(f'logged in as {bot.user}')
@@ -48,6 +53,7 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
         process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = await process.communicate()
         return stdout.decode(), stderr.decode()
+
 
     try:
         stdout, _ = await run_command(["yt-dlp", link, "--print", "live_status"])
@@ -90,13 +96,16 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
             clip_filename_compressed = f"25MB_{randomuuid}.mp4"
             if (os.path.getsize(clip_filename) > 25165824):
                 await interaction.followup.send(f"Download finished. Output file too large for Discord, compressing and uploading...")
-                compress(clip_filename, seconds)
+                await compress(clip_filename, seconds)
                 file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
                 await interaction.followup.send(file=file)
+                os.remove(clip_filename)
+                os.remove(clip_filename_compressed)
             else:
                 await interaction.followup.send(f"Download finished, uploading...")
                 file = discord.File(clip_filename, filename=f"clip_{randomuuid}.mp4")
                 await interaction.followup.send(file=file)
+                os.remove(clip_filename_compressed)
             
         case "is_upcoming":
             await interaction.followup.send(f"`{link}` is an upcoming stream, cannot clip something that doesn't exist yet ;)")
