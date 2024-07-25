@@ -11,11 +11,14 @@
 5. Click on `Reset Token` to obtain your bot token
 > [!IMPORTANT]
 > Do NOT share your bot token with anyone. It is the equivalent of a password and they will steal your bot and do nefarious things.
+
 ![Reset Token](/add-bot-readme/5-reset-to-obtain-token.png)
 ![Reset Confirmation](/add-bot-readme/5.1-reset-confirm.png)
+
 > [!NOTE]
 > If your account has 2FA enabled, you will need to enter your 2FA code to reset the token.
 ![2FA Code](/add-bot-readme/5.2-2fa-reset.png)
+
 6. Copy the token and paste it somewhere safe (or in this case the `.env` file)
 ![Copy Token](/add-bot-readme/6-copy-token.png)
 7. Go to the "OAuth2" tab and select "bot" and "applications.commands" under "OAuth2 URL Generator". Then, scroll down and set the permissions you want your bot to have. Then click the copy button and paste the link into your browser.
@@ -25,6 +28,7 @@
 ![Authorize Bot](/add-bot-readme/8-select-server.png)
 > [!NOTE]
 > Complete the captcha if shown
+
 ![Captcha](/add-bot-readme/8.1-captcha.png)
 9. You should see a success message. Click "X" to close the window.
 ![Success](/add-bot-readme/9-done.png)
