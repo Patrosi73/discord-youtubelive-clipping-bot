@@ -1,6 +1,7 @@
 import subprocess
 import asyncio
-from bot import send_message
+from utils import send_message
+
 # this is mostly stolen code from https://github.com/MyloBishop/discompress because i was too lazy to figure out compression stuff myself haha
 async def run_command(command):
         process = await asyncio.create_subprocess_exec(*command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

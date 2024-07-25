@@ -7,6 +7,7 @@ from compress import compress
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands
+from utils import send_message
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,9 +29,7 @@ async def sync(ctx: commands.Context) -> None:
     await ctx.send(f"Synced {len(synced)} commands globally")
 
 
-async def send_message(interaction: discord.Interaction, message: str): 
-    await interaction.followup.send(message)
-    return
+
 
 
 @bot.event
@@ -41,10 +40,12 @@ async def on_ready():
 @app_commands.describe(link="The YouTube livestream to clip", seconds="The amount of seconds to clip", rewind="Rewind the specified amount of seconds - you probably want this")
 async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind: bool) -> None:
 
+    link = link.split(" ")[0]
+    print(link)
     await interaction.response.defer()
     max_duration_int = int(max_duration)
     if (seconds > max_duration_int):
-        await interaction.followup.send(f"Clip requested too large (max: {max_duration} seconds)")
+        await send_message(interaction,f"Clip requested too large (max: {max_duration} seconds)")
         return
 
     async def run_command(command):
@@ -56,16 +57,17 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
 
 
     try:
+
         stdout, _ = await run_command(["yt-dlp", link, "--print", "live_status"])
         live_status = stdout.strip()
     except Exception as e:
         last_line = e.args[0].strip().split('\n')[-1]
-        await interaction.followup.send(f"Failed to check live status: {str(last_line)}")
+        await send_message(interaction,f"Failed to check live status: ```ansi\n{str(last_line)}```")
         return
 
     match live_status:
         case "not_live":
-            await interaction.followup.send(f"{link} is not a livestream")
+            await send_message(interaction, f"{link} is not a livestream")
         case "is_live":
             randomuuid = str(uuid.uuid4())
             if rewind:
@@ -89,31 +91,31 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                     raise Exception(stderr)
             except Exception as e:
                 last_line = e.args[0].strip().split('\n')[-1]
-                await interaction.followup.send(f"Failed to download: {str(last_line)}")
+                await send_message(interaction, f"Failed to download: {str(last_line)}")
                 return
 
             clip_filename = f"{randomuuid}.mp4"
             clip_filename_compressed = f"25MB_{randomuuid}.mp4"
             if (os.path.getsize(clip_filename) > 25165824):
-                await interaction.followup.send(f"Download finished. Output file too large for Discord, compressing and uploading...")
+                await send_message(interaction, f"Download finished. Output file too large for Discord, compressing and uploading...")
                 await compress(clip_filename, seconds)
                 file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
                 await interaction.followup.send(file=file)
                 os.remove(clip_filename)
                 os.remove(clip_filename_compressed)
             else:
-                await interaction.followup.send(f"Download finished, uploading...")
+                await send_message(interaction, f"Download finished, uploading...")
                 file = discord.File(clip_filename, filename=f"clip_{randomuuid}.mp4")
                 await interaction.followup.send(file=file)
-                os.remove(clip_filename_compressed)
+                os.remove(clip_filename)
             
         case "is_upcoming":
-            await interaction.followup.send(f"`{link}` is an upcoming stream, cannot clip something that doesn't exist yet ;)")
+            await send_message(interaction,"`{link}` is an upcoming stream, cannot clip something that doesn't exist yet ;)")
         case "was_live":
-            await interaction.followup.send(f"`{link}` is no longer live")
+            await send_message(interaction,"`{link}` is no longer live")
         case "post_live":
-            await interaction.followup.send(f"`{link}` is no longer live and isn't yet processed. You just missed it :(")
+            await send_message(interaction,"`{link}` is no longer live and isn't yet processed. You just missed it :(")
         case _:
-            await interaction.followup.send(f"Unknown live status: `{live_status}`")
+            await send_message(interaction,"Unknown live status: `{live_status}`")
 
 bot.run(token)
