@@ -135,7 +135,7 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                         print(f"Failed to upload: {str(last_line)}")
                 if(os.getenv("USE_RCLONE_LINK") == "yes" or os.getenv("USE_RCLONE_LINK") == "YES"):
                     stdout, _ = await run_command(["rclone", "link", f"{rcloneremote}{clip_filename}"])
-                    link = stdout.decode('utf-8').partition('\n')[0]
+                    link = stdout.partition('\n')[0]
                     await send_message(interaction, f"Clip: {link}")
                     os.remove(clip_filename)
                 if(os.getenv("USE_RCLONE_LINK") == "no" or os.getenv("USE_RCLONE_LINK") == "NO"):

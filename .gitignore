@@ -164,3 +164,5 @@ cython_debug/
 keys.json
 yt-dlp.exe
 ffmpeg.exe
+rclone.1
+rclone.exe
