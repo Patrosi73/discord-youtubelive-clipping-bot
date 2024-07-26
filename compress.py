@@ -34,7 +34,6 @@ async def compress(inputfile, duration):
         print(f"FFmpeg stdout: {stdout}")
         print(f"FFmpeg stderr: {stderr}")
 
-        # Check if the output file exists
         if not os.path.exists(outputfile):
             raise Exception("Output file was not created")
 
