@@ -114,9 +114,9 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                     await send_message(interaction, f"Download finished. Output file too large for Discord, compressing and uploading...")
                     await compress(clip_filename, seconds)
                     file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
-                await interaction.followup.send(file=file)
-                os.remove(clip_filename)
-                os.remove(clip_filename_compressed)
+                    await interaction.followup.send(file=file)
+                    os.remove(clip_filename)
+                    os.remove(clip_filename_compressed)
                 if(os.getenv("USE_RCLONE") == "yes") or (os.getenv("USE_RCLONE") == "YES"):
                     await send_message(interaction, f"Download finished. Output file too large for Discord, uploading to remote rclone destination and sharing the link...")
                     rcloneremote = os.getenv("RCLONE_REMOTE_NAME")
@@ -137,9 +137,11 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                     stdout, _ = await run_command(["rclone", "link", f"{rcloneremote}{clip_filename}"])
                     link = stdout.decode('utf-8').partition('\n')[0]
                     await send_message(interaction, f"Clip: {link}")
+                    os.remove(clip_filename)
                 if(os.getenv("USE_RCLONE_LINK") == "no" or os.getenv("USE_RCLONE_LINK") == "NO"):
                     custom_link = os.getenv("CUSTOM_LINK")
                     await send_message(interaction, f"Clip: {custom_link}{clip_filename}")
+                    os.remove(clip_filename)
             else:
                 await send_message(interaction, f"Download finished, uploading...")
                 file = discord.File(clip_filename, filename=f"clip_{randomuuid}.mp4")
