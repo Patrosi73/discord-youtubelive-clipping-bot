@@ -110,12 +110,38 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
             clip_filename = f"{randomuuid}.mp4"
             clip_filename_compressed = f"25MB_{randomuuid}.mp4"
             if (os.path.getsize(clip_filename) > 25165824):
-                await send_message(interaction, f"Download finished. Output file too large for Discord, compressing and uploading...")
-                await compress(clip_filename, seconds)
-                file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
-                await interaction.followup.send(file=file)
-                os.remove(clip_filename)
-                os.remove(clip_filename_compressed)
+                if(os.getenv("USE_RCLONE") == "no") or (os.getenv("USE_RCLONE") == "NO"):
+                    await send_message(interaction, f"Download finished. Output file too large for Discord, compressing and uploading...")
+                    await compress(clip_filename, seconds)
+                    file = discord.File(clip_filename_compressed, filename=f"clip_{randomuuid}.mp4")
+                    await interaction.followup.send(file=file)
+                    os.remove(clip_filename)
+                    os.remove(clip_filename_compressed)
+                if(os.getenv("USE_RCLONE") == "yes") or (os.getenv("USE_RCLONE") == "YES"):
+                    await send_message(interaction, f"Download finished. Output file too large for Discord, uploading to remote rclone destination and sharing the link...")
+                    rcloneremote = os.getenv("RCLONE_REMOTE_NAME")
+                    rclonecommand = [
+                    "rclone",
+                    "copyto", clip_filename, f"{rcloneremote}{clip_filename}", f"-P"
+                    ]
+                    try:
+                        stdout, stderr = await run_command(rclonecommand)
+                        print(f"Rclone stdout: {stdout}")
+                        print(f"Rclone stderr: {stderr}")
+
+                    except Exception as e:
+                        last_line = str(e).strip().split('\n')[-1]
+                        await send_message(f"Failed to upload: {str(last_line)}")
+                        print(f"Failed to upload: {str(last_line)}")
+                if(os.getenv("USE_RCLONE_LINK") == "yes" or os.getenv("USE_RCLONE_LINK") == "YES"):
+                    stdout, _ = await run_command(["rclone", "link", f"{rcloneremote}{clip_filename}"])
+                    link = stdout.partition('\n')[0]
+                    await send_message(interaction, f"Clip: {link}")
+                    os.remove(clip_filename)
+                if(os.getenv("USE_RCLONE_LINK") == "no" or os.getenv("USE_RCLONE_LINK") == "NO"):
+                    custom_link = os.getenv("CUSTOM_LINK")
+                    await send_message(interaction, f"Clip: {custom_link}{clip_filename}")
+                    os.remove(clip_filename)
             else:
                 await send_message(interaction, f"Download finished, uploading...")
                 file = discord.File(clip_filename, filename=f"clip_{randomuuid}.mp4")
