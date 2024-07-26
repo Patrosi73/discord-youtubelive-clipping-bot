@@ -19,7 +19,6 @@ async def compress(inputfile, duration):
         "-hide_banner",
         "-loglevel", "warning",
         "-stats",
-        "-hwaccel", "auto",
         "-i", inputfile,
         "-c:v", "libx264",
         f"-b:v", f"{video_bitrate}k",
