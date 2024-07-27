@@ -88,14 +88,14 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                 download_command = [
                     "ytarchive",
                     f"-o", randomuuid, f"--live-from", f"-{seconds}s", f"--capture-duration", f"{seconds}s",  f"--h264",
-                    link, "1080p60/best"
+                    link, "1080p60/1080p/best"
                 ]
             else:
                 await interaction.followup.send(f"Downloading stream for {seconds} seconds...")
                 download_command = [
                     "ytarchive",
                     f"-o", randomuuid, f"--live-from", "now", f"--capture-duration", f"{seconds}s", f"--h264",
-                    link, "1080p60/best"
+                    link, "1080p60/1080p/best"
                 ]
             
             try:
