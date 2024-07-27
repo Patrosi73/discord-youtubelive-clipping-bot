@@ -102,6 +102,8 @@ async def clip(interaction: discord.Interaction, link: str, seconds: int, rewind
                 stdout, stderr = await run_command(download_command)
                 if "Final file" not in stdout and "Final file" not in stderr:
                     raise Exception(stderr)
+                print(f"FFmpeg stdout: {stdout}")
+                print(f"FFmpeg stderr: {stderr}")
             except Exception as e:
                 last_line = e.args[0].strip().split('\n')[-1]
                 await send_message(interaction, f"Failed to download: {str(last_line)}")
