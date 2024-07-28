@@ -1,6 +1,6 @@
 # Discord YouTube Live Clipping Bot
 
-A simple Discord clipping bot for YouTube livestreams. The clip is either:
+A simple Discord clipping bot for YouTube livestreams. The clip gets downloaded with a random UUID filename and is either:
 - uploaded to the Discord CDN (if it's below 25MB),
 - compressed and uploaded to the Discord CDN (if above 25MB),
 - or uploaded to an [rclone destination](https://rclone.org/overview/) and the link for it shared to Discord (also if above 25MB, this is not default and has to be optionally set up).
